@@ -1,19 +1,14 @@
-```
-# 👁️‍🗨️ SCENE-DETECT: Smart Home Scene Understanding for the Visually Impaired
+# SCENE-DETECT: Smart Home Scene Understanding for the Visually Impaired
 
 This project uses AI-based human pose detection to assist visually impaired individuals by recognizing real-time scenes at home and classifying them into three categories:
 
-- 🧍‍♂️ `Person OK` – Someone is present and everything appears normal
-- 🚫 `Person Not OK` – Someone is lying, unresponsive, or without orientation
-- 🚪 `Nobody` – No person is present in the scene
+- `Person OK` – Someone is present and everything appears normal
+- `Person Not OK` – Someone is lying, unresponsive, or without orientation
+- `Nobody` – No person is present in the scene
 
 The system works with images or video streams and optionally provides voice alerts.
 
----
-
 ## 📁 Project Structure
-
-```
 
 SCENE-DETECT/
 │
@@ -27,13 +22,9 @@ SCENE-DETECT/
 ├── requirements.txt        # List of Python packages
 └── README.md               # This file
 
-````
-
----
-
 ## ⚙️ How to Run
 
-### 1. 📦 Install dependencies
+### 1. Install dependencies
 
 Create a virtual environment (optional but recommended):
 
@@ -50,7 +41,7 @@ pip install -r requirements.txt
 
 ---
 
-### 2. 🖼️ Run on Static Images
+### 2. Run on Static Images
 
 To run on images from the folders:
 
@@ -66,7 +57,7 @@ This will:
 
 ---
 
-### 3. 🎥 Run on Live Video
+### 3. Run on Live Video
 
 To start real-time camera-based detection:
 
@@ -82,13 +73,13 @@ Features:
 
 ---
 
-## 🗣️ Voice Alert
+## Voice Alert
 
 The final model announces “Person Not OK!” using text-to-speech when a dangerous pose is detected.
 
 ---
 
-## ✅ 3D Privacy Feature
+## 3D Privacy Feature
 
 Only pose skeletons are used for final decision-making, ensuring that:
 
@@ -97,14 +88,14 @@ Only pose skeletons are used for final decision-making, ensuring that:
 
 ---
 
-## 📌 Notes
+## Notes
 
 * This project was developed as part of the Smart Scene Detect initiative
 * Ideal for smart homes, elderly care, and fall detection systems
 
 ---
 
-## 🤝 Acknowledgements
+## Acknowledgements
 
 Special thanks to:
 
@@ -114,7 +105,7 @@ Special thanks to:
 
 ---
 
-## 🧠 Future Work
+## Future Work
 
 * Integrate OpenPose for better 3D pose accuracy
 * Support for night-time detection (IR or low-light models)
