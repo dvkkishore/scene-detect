@@ -16,9 +16,9 @@ pose = mp_pose.Pose(static_image_mode=False, model_complexity=1, min_detection_c
 connections = mp_pose.POSE_CONNECTIONS
 
 # Camera setup (0 = default webcam, or replace with IP stream or index)
-#cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)
 
-cap = cv2.VideoCapture("https://192.168.155.55:8080/video")
+#cap = cv2.VideoCapture("https://192.168.155.55:8080/video")
 
 while cap.isOpened():
     ret, frame = cap.read()
