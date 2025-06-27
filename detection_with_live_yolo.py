@@ -9,7 +9,7 @@ tts_engine = pyttsx3.init()
 tts_engine.setProperty('rate', 150)
 last_alert = None
 
-# Load model
+# Load YOLOv8-pose model
 model = YOLO("yolov8n-pose.pt")  # or yolov8m/l/x-pose.pt
 
 # Canvas setup
@@ -17,12 +17,12 @@ canvas_size = 512
 #cap = cv2.VideoCapture(0)
 cap = cv2.VideoCapture("https://192.168.155.55:8080/video")
 
-# Scene classification
+# Scene classifier
 def classify_scene(kpts):
     visible = kpts[:, 2] > 0.5
     xs = kpts[visible, 0]
     ys = kpts[visible, 1]
-    zs = kpts[visible, 1]  # simulate z using y
+    zs = kpts[visible, 1]  # simulate Z from Y
 
     if len(xs) == 0 or len(ys) == 0:
         return "No Person"
@@ -33,12 +33,11 @@ def classify_scene(kpts):
     box_height = max_y - min_y
     z_std = np.std(zs)
 
-    # Torso angle
     try:
         LS, RS, LH, RH = kpts[5], kpts[6], kpts[11], kpts[12]
         if all(p[2] > 0.5 for p in [LS, RS, LH, RH]):
-            torso_x = (LH[0] + RH[0])/2 - (LS[0] + RS[0])/2
-            torso_y = (LH[1] + RH[1])/2 - (LS[1] + RS[1])/2
+            torso_x = (LH[0] + RH[0]) / 2 - (LS[0] + RS[0]) / 2
+            torso_y = (LH[1] + RH[1]) / 2 - (LS[1] + RS[1]) / 2
             angle = abs(math.degrees(math.atan2(torso_x, torso_y)))
             if angle > 90:
                 angle = 180 - angle
@@ -47,7 +46,6 @@ def classify_scene(kpts):
     except:
         angle = 0
 
-    # Voting
     votes = 0
     if box_width > box_height:
         votes += 1
@@ -64,19 +62,24 @@ while cap.isOpened():
     if not ret:
         break
 
+    # Run pose prediction
     results = model.predict(frame, conf=0.5, verbose=False)
 
-    # Blank canvas
+    # Delete image immediately
+    del frame
+    results[0].orig_img = None  # also clear internal cached copy
+
+    # Blank white canvas
     canvas = np.ones((canvas_size, canvas_size, 3), dtype=np.uint8) * 255
     scene_states = []
 
-    # Global scale + offset for consistent spacing
+    # Global bounding box (for consistent scale)
     all_kpts = results[0].keypoints.data.cpu().numpy().reshape(-1, 3)
     valid_all = all_kpts[:, 2] > 0.5
 
     if not np.any(valid_all):
         cv2.putText(canvas, "No Person Detected", (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-        cv2.imshow("SCENE-DETECT (Multi-Person)", canvas)
+        cv2.imshow("SCENE-DETECT (Privacy Clean)", canvas)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
         continue
@@ -91,7 +94,7 @@ while cap.isOpened():
     offset_x = (canvas_size - scale * (min_x + max_x)) / 2
     offset_y = (canvas_size - scale * (min_y + max_y)) / 2
 
-    # Draw each person
+    # Process each person
     for person in results[0].keypoints.data.cpu().numpy():
         kpts = person.reshape(-1, 3)
         conf = kpts[:, 2]
@@ -101,21 +104,7 @@ while cap.isOpened():
         scene = classify_scene(kpts)
         scene_states.append(scene)
 
-        # Compute torso center for label placement
-        try:
-            LS, RS, LH, RH = kpts[5], kpts[6], kpts[11], kpts[12]
-            if all(p[2] > 0.5 for p in [LS, RS, LH, RH]):
-                label_x = int(((LS[0] + RS[0] + LH[0] + RH[0]) / 4) * scale + offset_x)
-                label_y = int(((LS[1] + RS[1] + LH[1] + RH[1]) / 4) * scale + offset_y)
-            else:
-                label_x, label_y = 20, 20  # fallback
-        except:
-            label_x, label_y = 20, 20
-
-        # Choose label color
-        color = (0, 255, 0) if scene == "Person OK" else (0, 0, 255)
-        cv2.putText(canvas, scene, (label_x, label_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-
+        # Draw joints
         for i, (x, y, c) in enumerate(kpts):
             if c < 0.5:
                 continue
@@ -123,6 +112,7 @@ while cap.isOpened():
             cy = int(y * scale + offset_y)
             cv2.circle(canvas, (cx, cy), 3, (0, 0, 255), -1)
 
+        # Draw skeleton
         skeleton = [
             (5, 7), (7, 9), (6, 8), (8, 10),
             (11, 13), (13, 15), (12, 14), (14, 16),
@@ -136,7 +126,21 @@ while cap.isOpened():
                 y2 = int(kpts[b][1] * scale + offset_y)
                 cv2.line(canvas, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-    # Voice Alert
+        # 📍 Label placement: torso center
+        try:
+            LS, RS, LH, RH = kpts[5], kpts[6], kpts[11], kpts[12]
+            if all(p[2] > 0.5 for p in [LS, RS, LH, RH]):
+                label_x = int(((LS[0] + RS[0] + LH[0] + RH[0]) / 4) * scale + offset_x)
+                label_y = int(((LS[1] + RS[1] + LH[1] + RH[1]) / 4) * scale + offset_y)
+            else:
+                label_x, label_y = 20, 20
+        except:
+            label_x, label_y = 20, 20
+
+        label_color = (0, 255, 0) if scene == "Person OK" else (0, 0, 255)
+        cv2.putText(canvas, scene, (label_x, label_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, label_color, 2)
+
+    # 🔈 Voice alert if any NOT OK
     if "Person NOT OK" in scene_states and last_alert != "Person NOT OK":
         tts_engine.say("Alert. Person not okay.")
         tts_engine.runAndWait()
@@ -144,11 +148,8 @@ while cap.isOpened():
     elif "Person NOT OK" not in scene_states:
         last_alert = "OK"
 
-    # Display label
-    label = " | ".join(scene_states) if scene_states else "No Person Detected"
-    cv2.putText(canvas, label, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-    cv2.imshow("SCENE-DETECT (Multi-Person)", canvas)
-
+    # Show result
+    cv2.imshow("SCENE-DETECT (Privacy Clean)", canvas)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 

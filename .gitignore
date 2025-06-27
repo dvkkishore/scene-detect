@@ -19,3 +19,10 @@ Thumbs.db
 # Ignore test images, outputs, logs (optional)
 demo_frames/
 *.log
+
+main.py
+main1_bounding_box.py
+main1_torso_angle.py
+yolorefine.py
+tk.py
+scene_detect_yolo.py
