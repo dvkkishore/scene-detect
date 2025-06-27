@@ -11,20 +11,20 @@ The system uses pose detection and intelligent rules to classify each situation 
 
 ---
 
-## 💡 Project Highlights
+## Project Highlights
 
-- ✅ **Privacy first**: no original images are stored or shown
-- ✅ **Real-time** and **image-based** variants
-- ✅ Works with **single or multiple persons**
-- ✅ Powered by **MediaPipe** and **YOLOv8-Pose**
-- ✅ Audio alerts for critical events
+- **Privacy first**: no original images are stored or shown
+- **Real-time** and **image-based** variants
+- Works with **single or multiple persons**
+- Powered by **MediaPipe** and **YOLOv8-Pose**
+- Audio alerts for critical events
 
 ---
 
-## 📂 Project Files
+## Project Files
 
 ### `detection_with_images.py`
-🔍 **Single Image Scene Detection**  
+**Single Image Scene Detection**  
 This script processes individual images from three folders:
 - `/Nobody/`
 - `/Person OK/`
@@ -41,7 +41,7 @@ For each image:
 ---
 
 ### `detection_with_live_mediapipe.py`
-🎥 **Live Scene Detection (Single Person Only)**  
+**Live Scene Detection (Single Person Only)**  
 Uses a webcam or phone camera feed and processes each frame using MediaPipe Pose.
 
 - Only detects **one person** at a time
@@ -55,7 +55,7 @@ Uses a webcam or phone camera feed and processes each frame using MediaPipe Pose
 ---
 
 ### `detection_with_live_yolo.py`
-👥 **Live Scene Detection (Multi-Person)**  
+**Live Scene Detection (Multi-Person)**  
 Uses YOLOv8-Pose for real-time detection of **multiple people**.
 
 - Draws each person as a stick figure in **true position**
@@ -68,14 +68,14 @@ Uses YOLOv8-Pose for real-time detection of **multiple people**.
 
 ---
 
-## 🔊 Voice Output
+## Voice Output
 All live scripts support audio alerts via `pyttsx3`. The system says:  
 **“Alert. Person not okay.”**  
 ...when a collapsed person is detected.
 
 ---
 
-## 🔧 Requirements
+## Requirements
 
 Install dependencies:
 ```bash
@@ -96,7 +96,7 @@ Basic requirements:
 
 ---
 
-## ▶️ How to Run
+## How to Run
 
 **Image detection:**
 ```bash
@@ -115,7 +115,7 @@ python detection_with_live_yolo.py
 
 ---
 
-## 🛡️ Privacy Compliance
+## Privacy Compliance
 
 SCENE-DETECT ensures:
 - Original RGB frames are deleted immediately after pose extraction
@@ -124,7 +124,7 @@ SCENE-DETECT ensures:
 
 ---
 
-## 📌 Use Cases
+## Use Cases
 
 - 🏠 Smart home monitoring for elderly or visually impaired
 - 🧪 Human activity classification demos
@@ -133,14 +133,10 @@ SCENE-DETECT ensures:
 
 ---
 
-## 👤 Authors
+## Authors
 
-- **Your Name**
-- Smart Scene Detect Project, [Your University Name]
-- Course: Medical Systems Engineering / AI for Industrial Applications
+- **Farrukh Rasool, Ammad Majid, Sai Pavan Bolagani, Syed Annas Jawed, Soham Shripad Kharadkar, Venkata Kishore Dannana**
+- Smart Scene Detect Project, [OTH Amberg-Weiden]
+- Course: Industry 4.0 Project/ Artificial Intelligence for Industrial Applications
 
 ---
-
-## 📄 License
-
-MIT License — feel free to use, modify, and improve with attribution.
