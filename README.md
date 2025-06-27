@@ -82,11 +82,6 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-You may also need:
-```bash
-sudo apt install libespeak1 ffmpeg
-```
-
 Basic requirements:
 - Python 3.8+
 - OpenCV
