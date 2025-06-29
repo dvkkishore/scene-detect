@@ -138,7 +138,7 @@ SCENE-DETECT ensures:
 ## Authors
 
 - **Farrukh Rasool, Ammad Majid, Sai Pavan Bolagani, Syed Annas Jawed, Soham Shripad Kharadkar, Venkata Kishore Dannana**
-- Smart Scene Detect Project, [OTH Amberg-Weiden]
+- Smart Scene Detect Project, OTH Amberg-Weiden
 - Course: Industry 4.0 Project/ Artificial Intelligence for Industrial Applications
 
 ---
