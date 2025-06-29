@@ -126,7 +126,7 @@ while cap.isOpened():
                 y2 = int(kpts[b][1] * scale + offset_y)
                 cv2.line(canvas, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-        # 📍 Label placement: torso center
+        # Label placement: torso center
         try:
             LS, RS, LH, RH = kpts[5], kpts[6], kpts[11], kpts[12]
             if all(p[2] > 0.5 for p in [LS, RS, LH, RH]):
@@ -140,7 +140,7 @@ while cap.isOpened():
         label_color = (0, 255, 0) if scene == "Person OK" else (0, 0, 255)
         cv2.putText(canvas, scene, (label_x, label_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, label_color, 2)
 
-    # 🔈 Voice alert if any NOT OK
+    # Voice alert if any NOT OK
     if "Person NOT OK" in scene_states and last_alert != "Person NOT OK":
         tts_engine.say("Alert. Person not okay.")
         tts_engine.runAndWait()

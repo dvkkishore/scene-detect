@@ -78,8 +78,15 @@ All live scripts support audio alerts via `pyttsx3`. The system says:
 ## Requirements
 
 Install dependencies:
+
+**For Linux**
 ```bash
-pip install -r requirements.txt
+pip install -r requirements_linux.txt
+```
+
+**For Windows**
+```bash
+pip install -r requirements_win.txt
 ```
 
 Basic requirements:
