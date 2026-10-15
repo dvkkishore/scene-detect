@@ -13,7 +13,7 @@ The system uses pose detection and intelligent rules to classify each situation 
 
 ## Project Highlights
 
-- **Privacy first**: no original images are stored or shown
+- **Skeleton-only live display**: the live viewer renders keypoints, not full-color camera frames; camera images are still processed in memory and sample photos are in this repository
 - **Real-time** and **image-based** variants
 - Works with **single or multiple persons**
 - Powered by **MediaPipe** and **YOLOv8-Pose**
@@ -45,10 +45,10 @@ For each image:
 Uses a webcam or phone camera feed and processes each frame using MediaPipe Pose.
 
 - Only detects **one person** at a time
-- Very accurate pose quality (33 points, including z-depth)
+- MediaPipe estimates 33 landmarks including relative z values (not a calibrated physical depth measurement)
 - Draws stick-figure in real time on a clean canvas
 - Announces via voice: **"Person not okay!"**
-- Discards the original image after use (privacy maintained)
+- Drops local frame references after inference; this is not a formal privacy guarantee
 
 📁 Best for: simple demos, high-accuracy single-person use
 
@@ -61,8 +61,8 @@ Uses YOLOv8-Pose for real-time detection of **multiple people**.
 - Draws each person as a stick figure in **true position**
 - Classifies each person individually: **OK** / **NOT OK**
 - Places labels near each person
-- Voice alert if **anyone** is "NOT OK"
-- All raw image data is deleted after use to preserve privacy
+- Voice alert if **anyone** is classified "NOT OK" by the posture heuristic
+- Attempts to drop raw frame references after inference; library-level retention is not verified
 
 📁 Best for: advanced demos, multi-person environments, smart home simulation
 
@@ -117,12 +117,21 @@ python detection_with_live_yolo.py
 
 ---
 
-## Privacy Compliance
+## Safety and Privacy Limitations
 
-SCENE-DETECT ensures:
-- Original RGB frames are deleted immediately after pose extraction
-- Output is shown as skeleton-only canvas
-- Designed with assistive and ethical AI principles in mind
+This is a **research/demo posture heuristic**, not medical-grade fall detection. A person lying voluntarily may be flagged, and a genuine fall may be missed. Do not rely on these labels for emergencies or unsupervised elderly-care monitoring. The YOLOv8-pose stream returns 2D coordinates and confidence; the implementation must not treat image Y position as a genuine depth measurement.
+
+The live interfaces show skeleton-only renderings, but original RGB frames are processed by MediaPipe/Ultralytics in memory. Deleting Python references does not prove that all internal copies are immediately erased. The repository also contains test photos. No regulatory/privacy compliance has been established by this prototype.
+
+**Camera selection (YOLO):** the default source is camera index 0. Set `SCENE_DETECT_CAMERA` to another camera index or stream URL in the environment if required. Do not commit a credential-bearing camera URL.
+
+**Classifier regression tests:**
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+The lightweight classifier tests require NumPy and do not require a camera or pre-trained model. Real-world sensitivity and false-alert rates remain unevaluated.
 
 ---
 
