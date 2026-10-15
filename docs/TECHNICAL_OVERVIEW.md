@@ -1,4 +1,4 @@
-# SCENE-DETECT: Pose-based scene understanding
+# scene-detect: Technical overview
 
 ## Problem and motivation
 
@@ -45,8 +45,27 @@ A working MediaPipe environment is necessary for real-image inference. `--show` 
 
 An empirical study would need consented and labeled footage, subject/session-disjoint splits, a confusion matrix for each variant, false-alert rates, sensitivity/recall, and measurement under poor lighting and occlusion. See [EXPERIMENTS.md](../EXPERIMENTS.md) for the protocol; the repository does not currently establish those metrics.
 
-## Team and individual contribution
+## Team attribution
 
-This is a **team project**, credited to **Farrukh Rasool, Ammad Majid, Sai Pavan Bolagani, Syed Annas Jawed, Soham Shripad Kharadkar and Venkata Kishore Dannana** (as recorded in the README). The repository does not by itself specify who individually developed each subsystem. Any personal portfolio case study should accurately identify the parts you owned using commit records or team confirmation.
+This is a **team project**, credited to **Farrukh Rasool, Ammad Majid, Sai Pavan Bolagani, Syed Annas Jawed, Soham Shripad Kharadkar and Venkata Kishore Dannana** (as recorded in the README). The repository does not by itself specify who individually developed each subsystem. The source does not attribute each subsystem to individual authors. Confirm individual contributions with commit history and collaborators where relevant.
 
 **Primary sources:** [README](../README.md) · [YOLO classifier](../pose_classifier.py) · [image demo](../detection_with_images.py).
+
+
+## Repository map
+
+| Path | Purpose |
+| --- | --- |
+| `detection_with_images.py` | Process a selected image, optionally saving the skeleton visualization |
+| `detection_with_live_mediapipe.py` | Live single-person pose path |
+| `detection_with_live_yolo.py` | Live multi-person keypoint path |
+| `pose_classifier.py` | 2D heuristic used by the YOLO path |
+| `tests/` | Synthetic classifier and CLI checks |
+| `EXPERIMENTS.md` | Proposed evaluation protocol |
+| `Person OK/`, `Person not OK/`, `Nobody/` | Example images with rights/provenance to verify |
+
+## Running and interpreting the system
+
+Run `python detection_with_images.py --help` for image CLI options; the main README shows a concrete image input example. The offline tests run with `python -m unittest discover -s tests -v`. The streaming variants require compatible camera and model dependencies.
+
+Posture labels are heuristic outputs, not verified health status. RGB camera frames are still processed in memory although displays render skeletons. Ground-truth performance and legal privacy compliance have not been established.
