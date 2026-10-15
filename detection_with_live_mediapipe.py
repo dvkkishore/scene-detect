@@ -18,7 +18,6 @@ connections = mp_pose.POSE_CONNECTIONS
 # Camera setup (0 = default webcam, or replace with IP stream or index)
 cap = cv2.VideoCapture(0)
 
-#cap = cv2.VideoCapture("https://192.168.155.55:8080/video")
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -48,7 +47,7 @@ while cap.isOpened():
         box_width = max_x - min_x
         box_height = max_y - min_y
 
-        scale = 0.8 * canvas_size / max(box_width, box_height)
+        scale = 0.8 * canvas_size / max(box_width, box_height, 1e-6)
         offset_x = (canvas_size - scale * (min_x + max_x)) / 2
         offset_y = (canvas_size - scale * (min_y + max_y)) / 2
 
@@ -78,7 +77,7 @@ while cap.isOpened():
         right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP]
 
         torso_x = avg(right_hip.x, left_hip.x) - avg(right_shoulder.x, left_shoulder.x)
-        torso_y = avg(right_hip.y, left_hip.y) - avg(right_shoulder.y, right_shoulder.y)
+        torso_y = avg(right_hip.y, left_hip.y) - avg(right_shoulder.y, left_shoulder.y)
         angle = abs(math.degrees(math.atan2(torso_x, torso_y)))
         if angle > 90:
             angle = 180 - angle
