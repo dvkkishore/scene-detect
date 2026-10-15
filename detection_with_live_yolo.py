@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 import pyttsx3
-import math
+import os
 
 # Init voice
 tts_engine = pyttsx3.init()
@@ -14,47 +14,11 @@ model = YOLO("yolov8n-pose.pt")  # or yolov8m/l/x-pose.pt
 
 # Canvas setup
 canvas_size = 512
-#cap = cv2.VideoCapture(0)
-cap = cv2.VideoCapture("https://192.168.155.55:8080/video")
+camera_source = os.environ.get("SCENE_DETECT_CAMERA", "0")
+cap = cv2.VideoCapture(int(camera_source) if camera_source.isdecimal() else camera_source)
 
-# Scene classifier
-def classify_scene(kpts):
-    visible = kpts[:, 2] > 0.5
-    xs = kpts[visible, 0]
-    ys = kpts[visible, 1]
-    zs = kpts[visible, 1]  # simulate Z from Y
-
-    if len(xs) == 0 or len(ys) == 0:
-        return "No Person"
-
-    min_x, max_x = np.min(xs), np.max(xs)
-    min_y, max_y = np.min(ys), np.max(ys)
-    box_width = max_x - min_x
-    box_height = max_y - min_y
-    z_std = np.std(zs)
-
-    try:
-        LS, RS, LH, RH = kpts[5], kpts[6], kpts[11], kpts[12]
-        if all(p[2] > 0.5 for p in [LS, RS, LH, RH]):
-            torso_x = (LH[0] + RH[0]) / 2 - (LS[0] + RS[0]) / 2
-            torso_y = (LH[1] + RH[1]) / 2 - (LS[1] + RS[1]) / 2
-            angle = abs(math.degrees(math.atan2(torso_x, torso_y)))
-            if angle > 90:
-                angle = 180 - angle
-        else:
-            angle = 0
-    except:
-        angle = 0
-
-    votes = 0
-    if box_width > box_height:
-        votes += 1
-    if angle > 30:
-        votes += 1
-    if z_std < 20:
-        votes += 1
-
-    return "Person NOT OK" if votes >= 2 else "Person OK"
+# Classify from 2D keypoints. YOLOv8-pose keypoints do not contain metric depth.
+from pose_classifier import classify_scene
 
 # Main loop
 while cap.isOpened():
