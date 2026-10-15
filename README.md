@@ -1,5 +1,9 @@
-
 # SCENE-DETECT — Human Scene Detection for Smart Homes
+
+> **At a glance:** A collaborative computer-vision prototype that turns camera images into skeleton-based scene representations and posture flags. **Stack:** MediaPipe Pose, YOLOv8-Pose, OpenCV and Python. **Evidence:** image/live variants and focused tests. **Caution:** a posture flag is **not** a validated fall or medical-emergency diagnosis.
+
+**Explore:** [How it works](#project-files) · [Run an image](#how-to-run) · [Evaluation protocol](EXPERIMENTS.md) · [Case study](docs/CASE_STUDY.md) · [Team](#authors)
+
 
 **SCENE-DETECT** is a smart, privacy-conscious scene understanding system designed to assist blind and visually impaired individuals. It automatically detects what is happening in a room — specifically:
 
