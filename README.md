@@ -1,11 +1,8 @@
 # SCENE-DETECT — Human Scene Detection for Smart Homes
 
-> **At a glance:** A collaborative computer-vision prototype that turns camera images into skeleton-based scene representations and posture flags. **Stack:** MediaPipe Pose, YOLOv8-Pose, OpenCV and Python. **Evidence:** image/live variants and focused tests. **Caution:** a posture flag is **not** a validated fall or medical-emergency diagnosis.
+**Documentation:** [Variants](#project-files) · [Run examples](#how-to-run) · [Evaluation protocol](EXPERIMENTS.md) · [Technical overview](docs/TECHNICAL_OVERVIEW.md) · [Authors](#authors)
 
-**Explore:** [How it works](#project-files) · [Run an image](#how-to-run) · [Evaluation protocol](EXPERIMENTS.md) · [Case study](docs/CASE_STUDY.md) · [Team](#authors)
-
-
-**SCENE-DETECT** is a smart, privacy-conscious scene understanding system designed to assist blind and visually impaired individuals. It automatically detects what is happening in a room — specifically:
+**SCENE-DETECT** is a prototype that uses pose-estimation keypoints to produce skeleton views and heuristic posture labels:
 
 - Person is **present and OK**
 - Person is **present and NOT OK** (e.g., collapsed or lying)
@@ -52,7 +49,7 @@ Uses a webcam or phone camera feed and processes each frame using MediaPipe Pose
 - Announces via voice: **"Person not okay!"**
 - Drops local frame references after inference; this is not a formal privacy guarantee
 
-📁 Best for: simple demos, high-accuracy single-person use
+📁 Intended for: experiments with single-person live pose inference
 
 ---
 
@@ -73,7 +70,7 @@ Uses YOLOv8-Pose for real-time detection of **multiple people**.
 ## Voice Output
 All live scripts support audio alerts via `pyttsx3`. The system says:  
 **“Alert. Person not okay.”**  
-...when a collapsed person is detected.
+...when the posture heuristic flags a possible concern.
 
 ---
 
