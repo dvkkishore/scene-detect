@@ -24,19 +24,17 @@ The system uses pose detection and intelligent rules to classify each situation 
 ## Project Files
 
 ### `detection_with_images.py`
-**Single Image Scene Detection**  
-This script processes individual images from three folders:
-- `/Nobody/`
-- `/Person OK/`
-- `/Person NOT OK/`
+**Single Image Scene Visualization**
 
-For each image:
-- Detects pose using MediaPipe
-- Classifies the scene
-- Draws a clean stick-figure skeleton on a 512×512 canvas
-- Labels the result and saves it
+This script processes **one explicitly selected image** using MediaPipe Pose. It produces a skeleton-only visualization and a heuristic posture label. It **does not automatically evaluate the folders of sample images**.
 
-📁 Useful for: testing, dataset analysis, offline evaluation
+```bash
+python detection_with_images.py --image "Person not OK/3.jpg" --output demo_frames/skeleton.png
+```
+
+Use `--show` to open an OpenCV preview window, or `--help` for options. The default is headless and prints the label; saving an output image requires `--output`. The legacy image rule flags posture when the torso is tilted **or** the visible bounds are wider than tall. This is intentionally distinct from the YOLO live classifier, which currently requires both cues.
+
+📁 Useful for: inspecting individual sample images and debugging posture heuristics, **not** measuring clinical safety.
 
 ---
 
@@ -100,9 +98,9 @@ Basic requirements:
 
 ## How to Run
 
-**Image detection:**
+**Image detection (specify an image):**
 ```bash
-python detection_with_images.py
+python detection_with_images.py --image "Person not OK/3.jpg" --output demo_frames/skeleton.png
 ```
 
 **Live detection (MediaPipe):**
@@ -116,6 +114,12 @@ python detection_with_live_yolo.py
 ```
 
 ---
+
+## Evaluation status
+
+There is **no verified sensitivity, specificity, false-alert rate or benchmark accuracy** for the real-world use case. The code includes synthetic unit tests for the pure YOLO 2D heuristic. See [EXPERIMENTS.md](EXPERIMENTS.md) for a proposed evaluation protocol and checklist before reporting any results.
+
+Note: the `requirements_linux.txt` and `requirements_win.txt` files are historical environment exports rather than a verified portable installation recipe. In particular, the Linux freeze also contains ROS-related packages unrelated to the isolated classifier tests.
 
 ## Safety and Privacy Limitations
 

@@ -1,91 +1,91 @@
-import cv2
-import mediapipe as mp
-import numpy as np
-import math
+"""Single-image pose-visualization demo (no clinical fall detection)."""
+import argparse
+from pathlib import Path
 
-# Pose Estimation Setup
-mp_pose = mp.solutions.pose
-pose = mp_pose.Pose(static_image_mode=True, model_complexity=2)
-mp_drawing = mp.solutions.drawing_utils
 
-# Load Image
-image_path = 'Person not OK/3.jpg'
-image = cv2.imread(image_path)
-image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(
+        description="Render a skeleton-only image from an explicitly selected photo."
+    )
+    parser.add_argument("--image", type=Path, required=True, help="Input image file")
+    parser.add_argument("--output", type=Path, help="Optional PNG/JPEG output path")
+    parser.add_argument("--show", action="store_true", help="Open an OpenCV preview window")
+    return parser.parse_args(argv)
 
-# Pose Detection
-results = pose.process(image_rgb)
 
-# Discard original image (Privacy)
-del image
-del image_rgb
+def process_image(image_path, output_path=None, show=False):
+    import math
+    import cv2
+    import mediapipe as mp
+    import numpy as np
 
-# Create Blank Canvas
-canvas_size = 512
-skeleton_canvas = np.ones((canvas_size, canvas_size, 3), dtype=np.uint8) * 255  # White background
+    # The image and the skeleton are handled locally. This is not a privacy audit.
+    frame = cv2.imread(str(image_path))
+    if frame is None:
+        raise ValueError(f"Unable to read image: {image_path}")
 
-# Draw Skeleton if Detected
-if results.pose_landmarks:
-    landmarks = results.pose_landmarks.landmark
+    pose_api = mp.solutions.pose
+    with pose_api.Pose(static_image_mode=True, model_complexity=2) as pose:
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(rgb)
+        del frame, rgb
 
-    # Find bounding box
-    landmark_x = [lm.x for lm in landmarks]
-    landmark_y = [lm.y for lm in landmarks]
-    min_x, max_x = min(landmark_x), max(landmark_x)
-    min_y, max_y = min(landmark_y), max(landmark_y)
+    canvas_size = 512
+    canvas = np.ones((canvas_size, canvas_size, 3), dtype=np.uint8) * 255
+    label = "No Person Detected"
 
-    # Calculate scale and offset
-    box_width = max_x - min_x
-    box_height = max_y - min_y
-    scale = 0.8 * canvas_size / max(box_width, box_height) 
-    offset_x = (canvas_size - scale * (min_x + max_x)) / 2
-    offset_y = (canvas_size - scale * (min_y + max_y)) / 2
+    if results.pose_landmarks:
+        landmarks = results.pose_landmarks.landmark
+        xs = [point.x for point in landmarks]
+        ys = [point.y for point in landmarks]
+        width = max(xs) - min(xs)
+        height = max(ys) - min(ys)
+        scale = 0.8 * canvas_size / max(width, height, 1e-6)
+        offset_x = (canvas_size - scale * (min(xs) + max(xs))) / 2
+        offset_y = (canvas_size - scale * (min(ys) + max(ys))) / 2
 
-    # Draw all landmarks and connections
-    connections = mp_pose.POSE_CONNECTIONS
+        for start, end in pose_api.POSE_CONNECTIONS:
+            a, b = landmarks[start], landmarks[end]
+            if a.visibility <= 0.5 or b.visibility <= 0.5:
+                continue
+            p1 = (int(a.x * scale + offset_x), int(a.y * scale + offset_y))
+            p2 = (int(b.x * scale + offset_x), int(b.y * scale + offset_y))
+            cv2.line(canvas, p1, p2, (0, 255, 0), 2)
 
-    for connection in connections:
-        start_idx, end_idx = connection
-        if landmarks[start_idx].visibility > 0.5 and landmarks[end_idx].visibility > 0.5:
-            x_start = int(landmarks[start_idx].x * scale + offset_x)
-            y_start = int(landmarks[start_idx].y * scale + offset_y)
-            x_end = int(landmarks[end_idx].x * scale + offset_x)
-            y_end = int(landmarks[end_idx].y * scale + offset_y)
-            cv2.line(skeleton_canvas, (x_start, y_start), (x_end, y_end), (0, 255, 0), 2)
+        for point in landmarks:
+            if point.visibility > 0.5:
+                position = (int(point.x * scale + offset_x), int(point.y * scale + offset_y))
+                cv2.circle(canvas, position, 3, (0, 0, 255), -1)
 
-    for lm in landmarks:
-        if lm.visibility > 0.5:
-            x = int(lm.x * scale + offset_x)
-            y = int(lm.y * scale + offset_y)
-            cv2.circle(skeleton_canvas, (x, y), 3, (0, 0, 255), -1)
+        ls, rs = landmarks[pose_api.PoseLandmark.LEFT_SHOULDER], landmarks[pose_api.PoseLandmark.RIGHT_SHOULDER]
+        lh, rh = landmarks[pose_api.PoseLandmark.LEFT_HIP], landmarks[pose_api.PoseLandmark.RIGHT_HIP]
+        torso_dx = (lh.x + rh.x - ls.x - rs.x) / 2
+        torso_dy = (lh.y + rh.y - ls.y - rs.y) / 2
+        angle = abs(math.degrees(math.atan2(torso_dx, torso_dy)))
+        if angle > 90:
+            angle = 180 - angle
 
-    # Scene Classification Logic
-    torso_vector_x = (landmarks[mp_pose.PoseLandmark.RIGHT_HIP].x + landmarks[mp_pose.PoseLandmark.LEFT_HIP].x)/2 - (landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].x + landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].x)/2
-    torso_vector_y = (landmarks[mp_pose.PoseLandmark.RIGHT_HIP].y + landmarks[mp_pose.PoseLandmark.LEFT_HIP].y)/2 - (landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].y + landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].y)/2
+        # Preserve this legacy image demo's OR heuristic. It differs from the
+        # multi-person YOLO demo's stricter two-cue posture rule.
+        sideways = width > height or angle > 30
+        label = "Person NOT OK (Posture Flag)" if sideways else "Person OK (Posture Flag Clear)"
 
-    angle_rad = math.atan2(torso_vector_x, torso_vector_y)
-    angle_deg = abs(math.degrees(angle_rad))
-    if angle_deg > 90:
-        angle_deg = 180 - angle_deg
+    cv2.putText(canvas, label, (10, 36), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 0), 2)
+    if output_path:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        if not cv2.imwrite(str(output_path), canvas):
+            raise OSError(f"Unable to save skeleton image: {output_path}")
+    if show:
+        cv2.imshow("SCENE-DETECT: Skeleton Preview", canvas)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    return label
 
-    lying_votes = 0
-    if box_width > box_height:
-        lying_votes += 1
-    if angle_deg > 30:
-        lying_votes += 1
 
-    if lying_votes >= 1:
-        scene = "Person NOT OK (Lying/Collapsed)"
-    else:
-        scene = "Person OK (Standing/Sitting)"
+def main(argv=None):
+    args = parse_args(argv)
+    print(process_image(args.image, args.output, args.show))
 
-else:
-    scene = "No Person Detected"
 
-# Display Scene Label
-cv2.putText(skeleton_canvas, scene, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-
-# Show Image
-cv2.imshow('Skeleton Scene Detection', skeleton_canvas)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    main()
