@@ -2,13 +2,13 @@
 
 **Documentation:** [Variants](#project-files) · [Run examples](#how-to-run) · [Evaluation protocol](EXPERIMENTS.md) · [Technical overview](docs/TECHNICAL_OVERVIEW.md) · [Authors](#authors)
 
-**SCENE-DETECT** is a prototype that uses pose-estimation keypoints to produce skeleton views and heuristic posture labels:
+**SCENE-DETECT** is an experimental pose-visualization and posture-classification prototype. It uses pose-estimation keypoints to render skeleton views and assign one of the code's heuristic labels:
 
-- Person is **present and OK**
-- Person is **present and NOT OK** (e.g., collapsed or lying)
-- **No person** in the scene
+- **Person OK** — the selected posture rule did not flag this person; this does *not* confirm the person's well-being
+- **Person NOT OK** — the selected posture rule flagged a possibly horizontal or tilted posture; this does *not* establish that a fall, collapse, or emergency occurred
+- **No Person Detected** — the model did not detect a person in this frame; this does *not* prove the room is empty
 
-The system uses pose detection and intelligent rules to classify each situation and optionally provides a voice alert when something is wrong.
+Live variants may speak an alert when a posture rule is triggered. **These are experimental visual/posture labels, not health assessments or emergency detection.**
 
 ---
 
@@ -18,7 +18,7 @@ The system uses pose detection and intelligent rules to classify each situation 
 - **Real-time** and **image-based** variants
 - Works with **single or multiple persons**
 - Powered by **MediaPipe** and **YOLOv8-Pose**
-- Audio alerts for critical events
+- Optional audio notifications when a posture rule is triggered (not validated emergency alerts)
 
 ---
 
@@ -57,20 +57,20 @@ Uses a webcam or phone camera feed and processes each frame using MediaPipe Pose
 **Live Scene Detection (Multi-Person)**  
 Uses YOLOv8-Pose for real-time detection of **multiple people**.
 
-- Draws each person as a stick figure in **true position**
+- Draws each detected person's stick figure using its estimated 2D image keypoints
 - Classifies each person individually: **OK** / **NOT OK**
 - Places labels near each person
-- Voice alert if **anyone** is classified "NOT OK" by the posture heuristic
+- Voice notification if **anyone** receives the rule-based "Person NOT OK" label
 - Attempts to drop raw frame references after inference; library-level retention is not verified
 
-📁 Best for: advanced demos, multi-person environments, smart home simulation
+📁 Intended for: multi-person pose-estimation experiments and visualization
 
 ---
 
 ## Voice Output
 All live scripts support audio alerts via `pyttsx3`. The system says:  
 **“Alert. Person not okay.”**  
-...when the posture heuristic flags a possible concern.
+...when the posture heuristic triggers. The wording is a literal spoken message from the demo, not confirmation of a medical event.
 
 ---
 
@@ -142,10 +142,11 @@ The lightweight classifier tests require NumPy and do not require a camera or pr
 
 ## Use Cases
 
-- 🏠 Smart home monitoring for elderly or visually impaired
-- 🧪 Human activity classification demos
-- 👩‍🏫 Teaching pose estimation + privacy-centered design
-- 📊 Dataset analysis and model evaluation
+- 🧪 Demonstrating posture classification on single images or live camera streams
+- 👩‍🏫 Teaching pose estimation and skeleton-based visualization
+- 📊 Exploring classifier evaluation, camera viewpoints, and false-alert behavior
+
+**Not a validated use case:** unattended safety monitoring of older or visually impaired people, fall detection, or triggering an emergency response. Such applications require separate real-world validation and safety controls.
 
 ---
 
