@@ -136,6 +136,4 @@ Original photographs and model weights are preserved. The repository has no top-
 
 **Farrukh Rasool, Ammad Majid, Sai Pavan Bolagani, Syed Annas Jawed, Soham Shripad Kharadkar, and Venkata Kishore Dannana.**
 
-Smart Scene Detect Project, **OTH Amberg-Weiden**. Course: **Industry 4.0 Project / Artificial Intelligence for Industrial Applications**.
-
-This project was developed collaboratively by the contributors listed above as part of the Industry 4.0 coursework at OTH Amberg-Weiden.
+Developed collaboratively for the **Industry 4.0 Project** course at **OTH Amberg-Weiden**, within the **Artificial Intelligence for Industrial Applications** program.
