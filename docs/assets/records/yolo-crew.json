@@ -1,0 +1,18 @@
+{
+  "script": "detection_with_live_yolo.py",
+  "script_sha256": "8db32023e1f242b467a42e637c2d172f6f9799213ab85caf2a1424b6bcd6c241",
+  "input": "docs/assets/inputs/nasa-sts93-crew.jpg",
+  "input_sha256": "605f1fbf3563ecd60b5f868fba61cf20dad7bc833e1a8694963a1a43ea6c5cbb",
+  "output": "docs/assets/outputs/yolo-crew.png",
+  "output_sha256": "b340d5636eb11d3665b0f09dcedda81cae66d4d3e0392c9081b6a14cc0bdb39e",
+  "drawn_labels": [
+    "Person OK",
+    "Person OK",
+    "Person OK",
+    "Person OK"
+  ],
+  "speech_requests_muted": [],
+  "capture_mode": "local file replay; last displayed canvas; GUI and speech intercepted",
+  "command": "python tools/capture_live_demo.py --variant yolo --input docs/assets/inputs/nasa-sts93-crew.jpg --output docs/assets/outputs/yolo-crew.png --record docs/assets/records/yolo-crew.json",
+  "model_sha256": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212"
+}

@@ -1,0 +1,14 @@
+{
+  "script": "detection_with_live_mediapipe.py",
+  "script_sha256": "4d24764c8bdcbca4c21750634aa0a98bbe03da1b8242cd0f9ece5b5982fc373a",
+  "input": "docs/assets/inputs/nasa-astronaut.jpg",
+  "input_sha256": "7df9e4b494e3d18ee98c0e7a51eb506ca377ccf67668ca7e8500a6704e12518d",
+  "output": "docs/assets/outputs/mediapipe-live-portrait.png",
+  "output_sha256": "c92b90034570e57a5095119d8592128dc7b762798f7dce57913f65b1b6b38ddd",
+  "drawn_labels": [
+    "Person OK"
+  ],
+  "speech_requests_muted": [],
+  "capture_mode": "local file replay; last displayed canvas; GUI and speech intercepted",
+  "command": "python tools/capture_live_demo.py --variant mediapipe --input docs/assets/inputs/nasa-astronaut.jpg --output docs/assets/outputs/mediapipe-live-portrait.png --record docs/assets/records/mediapipe-live-portrait.json"
+}

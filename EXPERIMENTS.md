@@ -3,9 +3,11 @@
 **Status:** Proposed protocol for a research demonstration. This document reports **no empirical results or validated safety performance**.
 
 ## Define the target
+
 Describe what the model should identify (e.g. a person appearing to lie sideways in the image), rather than equating posture with a medical emergency. A voluntary resting posture can resemble a collapse, and a real emergency can occur while someone is upright.
 
 The code contains **different heuristics**:
+
 - `detection_with_images.py`: single-image MediaPipe posture flag using an OR threshold.
 - `detection_with_live_mediapipe.py`: single-person MediaPipe approach using multiple cues, including an uncalibrated relative z signal.
 - `detection_with_live_yolo.py`: multi-person YOLOv8-pose using 2D keypoints with a width/height and torso-angle AND rule.
@@ -13,6 +15,7 @@ The code contains **different heuristics**:
 They must be evaluated **separately**. A reported score for one is not a score for the others.
 
 ## Recommended study plan
+
 1. Verify rights and consent for all images and clips, document recording conditions and ensure no unnecessary personal information is uploaded.
 2. Define explicit ground-truth classes for no visible person, ordinary activity, an unusual/possibly horizontal posture, and insufficient pose evidence. Specify who annotates ambiguous examples.
 3. Split by **person and recording session**, not randomly by adjacent video frame, to avoid subject/session leakage.
@@ -33,6 +36,14 @@ They must be evaluated **separately**. A reported score for one is not a score f
 | False-alert rate / missed incidents | Not measured |
 | Performance under low light/occlusion | Not measured |
 | Privacy/compliance review | Not completed |
+
+## Reproducibility evidence versus evaluation
+
+The [documented demonstration runs](docs/DEMONSTRATIONS.md) show real inference and rendering on credited inputs. They are deliberately small smoke checks, not an evaluation set. The rotated portrait is an orientation stress check; the crew portrait contains a missed person. Do not convert these selected examples into an accuracy percentage.
+
+For each evaluated input, record the input hash and rights, implementation commit, estimator and model-weight versions, variant, thresholds, resolution, camera/viewpoint, ground-truth label, predicted label, and handling of missing evidence. Preserve `Insufficient Pose` separately from `Person OK`. The image and MediaPipe-live rules have no equivalent explicit insufficient-pose state; disclose that difference rather than silently treating their outputs as comparable.
+
+For streaming studies, test flag entry, persistence, recovery, an intervening no-detection interval, and re-entry. Count the actual speech requests as well as frame labels. YOLO's no-keypoints branch bypasses the alert-state update; a no-detection interval may therefore preserve the previous flag state. Report camera capture, inference, rendering, and blocking text-to-speech time separately if measuring latency.
 
 ## Local smoke check
 
