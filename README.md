@@ -138,4 +138,4 @@ Original photographs and model weights are preserved. The repository has no top-
 
 Smart Scene Detect Project, **OTH Amberg-Weiden**. Course: **Industry 4.0 Project / Artificial Intelligence for Industrial Applications**.
 
-This is a collaborative project. Individual subsystem responsibilities are not assigned here; the original author list and contributor history are preserved.
+This project was developed collaboratively by the contributors listed above as part of the Industry 4.0 coursework at OTH Amberg-Weiden.
