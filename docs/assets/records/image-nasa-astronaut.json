@@ -1,0 +1,7 @@
+{
+  "command": "python detection_with_images.py --image docs/assets/inputs/nasa-astronaut.jpg --output docs/assets/outputs/image-nasa-astronaut.png",
+  "label": "Person OK (Posture Flag Clear)",
+  "input_sha256": "7df9e4b494e3d18ee98c0e7a51eb506ca377ccf67668ca7e8500a6704e12518d",
+  "output_sha256": "76bb7a0e8aa0b8f18f30704a97a335f133927463003555e73e02b521c52ea1ab",
+  "script_sha256": "d687f4d42e3403bde29e485057eba5ab02c7f572ac3110637ae2df226b2fed67"
+}

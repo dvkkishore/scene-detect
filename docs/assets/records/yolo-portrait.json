@@ -1,0 +1,15 @@
+{
+  "script": "detection_with_live_yolo.py",
+  "script_sha256": "8db32023e1f242b467a42e637c2d172f6f9799213ab85caf2a1424b6bcd6c241",
+  "input": "docs/assets/inputs/nasa-astronaut.jpg",
+  "input_sha256": "7df9e4b494e3d18ee98c0e7a51eb506ca377ccf67668ca7e8500a6704e12518d",
+  "output": "docs/assets/outputs/yolo-portrait.png",
+  "output_sha256": "943cf7cec97c868b5eeccc7cc7bec333a19e371f3691025add680b4162c15996",
+  "drawn_labels": [
+    "Insufficient Pose"
+  ],
+  "speech_requests_muted": [],
+  "capture_mode": "local file replay; last displayed canvas; GUI and speech intercepted",
+  "command": "python tools/capture_live_demo.py --variant yolo --input docs/assets/inputs/nasa-astronaut.jpg --output docs/assets/outputs/yolo-portrait.png --record docs/assets/records/yolo-portrait.json",
+  "model_sha256": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212"
+}

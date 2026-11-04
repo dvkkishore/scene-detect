@@ -1,0 +1,7 @@
+{
+  "command": "python detection_with_images.py --image docs/assets/inputs/nasa-astronaut-rotated.jpg --output docs/assets/outputs/image-nasa-astronaut-rotated.png",
+  "label": "Person NOT OK (Posture Flag)",
+  "input_sha256": "1fae31aa5da980ad3dc24980d1b08da05f62de08a9866f850ebe8c2f312e6228",
+  "output_sha256": "052f266b243f64dac1adb42c8339ab16d9b9ca0c0ddcffcdfccab7f326137ca1",
+  "script_sha256": "d687f4d42e3403bde29e485057eba5ab02c7f572ac3110637ae2df226b2fed67"
+}

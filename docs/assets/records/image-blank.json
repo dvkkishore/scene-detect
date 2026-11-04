@@ -1,0 +1,7 @@
+{
+  "command": "python detection_with_images.py --image docs/assets/inputs/blank.png --output docs/assets/outputs/image-blank.png",
+  "label": "No Person Detected",
+  "input_sha256": "0461408944107d62ceba22ac85a40474d3f3d67b9a886989f9c66e30bbc4ccf8",
+  "output_sha256": "ddef2690d88d675c75afacc59eabe59303f7f79f49e80b9b14d2bd5d41088545",
+  "script_sha256": "d687f4d42e3403bde29e485057eba5ab02c7f572ac3110637ae2df226b2fed67"
+}

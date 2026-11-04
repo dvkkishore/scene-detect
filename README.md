@@ -1,159 +1,141 @@
-# SCENE-DETECT — Human Scene Detection for Smart Homes
+# scene-detect
 
-**Documentation:** [Variants](#project-files) · [Run examples](#how-to-run) · [Evaluation protocol](EXPERIMENTS.md) · [Technical overview](docs/TECHNICAL_OVERVIEW.md) · [Authors](#authors)
+**Pose estimation, skeleton visualization, and interpretable posture rules.**
 
-**SCENE-DETECT** is an experimental pose-visualization and posture-classification prototype. It uses pose-estimation keypoints to render skeleton views and assign one of the code's heuristic labels:
+An experimental team project from OTH Amberg-Weiden. Three Python demos turn an image or camera stream into a skeleton view using MediaPipe or YOLOv8-Pose, then assign a heuristic posture label.
 
-- **Person OK** — the selected posture rule did not flag this person; this does *not* confirm the person's well-being
-- **Person NOT OK** — the selected posture rule flagged a possibly horizontal or tilted posture; this does *not* establish that a fall, collapse, or emergency occurred
-- **No Person Detected** — the model did not detect a person in this frame; this does *not* prove the room is empty
+<picture>
+  <source media="(max-width: 640px)" srcset="docs/assets/scene-detect-demo-mobile.png">
+  <img src="docs/assets/scene-detect-demo.png" alt="Actual YOLO live-script output beside its NASA STS-93 crew input: five people in the photograph, four rendered skeletons labeled Person OK. One person was missed.">
+</picture>
 
-Live variants may speak an alert when a posture rule is triggered. **These are experimental visual/posture labels, not health assessments or emergency detection.**
+*Actual inference on a local still image replayed through the live YOLO script; GUI and speech were intercepted for capture. Four poses were detected among five people. Photo: NASA; informational demonstration, no endorsement. [Commands, original canvases, and provenance](docs/DEMONSTRATIONS.md).*
 
----
+[Quick start](#quick-start) · [Variants](#choose-a-variant) · [Example outputs](#example-outputs) · [Technical overview](docs/TECHNICAL_OVERVIEW.md) · [Evaluation protocol](EXPERIMENTS.md)
 
-## Project Highlights
+## What it does
 
-- **Skeleton-only live display**: the live viewer renders keypoints, not full-color camera frames; camera images are still processed in memory and sample photos are in this repository
-- **Real-time** and **image-based** variants
-- Works with **single or multiple persons**
-- Powered by **MediaPipe** and **YOLOv8-Pose**
-- Optional audio notifications when a posture rule is triggered (not validated emergency alerts)
+The project explores how a scene can be summarized through body keypoints instead of a full-color display. It includes:
 
----
+- A headless image CLI that prints a label and optionally saves a 512 × 512 skeleton canvas.
+- A single-person MediaPipe camera viewer with 33 estimated landmarks.
+- A multi-person YOLO camera viewer with 17 keypoints per detected person and labels near each torso.
+- Spoken notifications in the live scripts when the posture flag first appears.
 
-## Project Files
+**The labels describe posture rules, not well-being.** `Person OK` means the rule did not trigger; it does not establish safety. `Person NOT OK` is a posture flag, not evidence of distress. `No Person Detected` does not establish an empty room. YOLO can also report `Insufficient Pose`.
 
-### `detection_with_images.py`
-**Single Image Scene Visualization**
+## Choose a variant
 
-This script processes **one explicitly selected image** using MediaPipe Pose. It produces a skeleton-only visualization and a heuristic posture label. It **does not automatically evaluate the folders of sample images**.
+| | Image / MediaPipe | Live / MediaPipe | Live / YOLOv8-Pose |
+| --- | --- | --- | --- |
+| Entry point | [Image CLI](detection_with_images.py) | [MediaPipe viewer](detection_with_live_mediapipe.py) | [YOLO viewer](detection_with_live_yolo.py) |
+| Input | One explicitly selected image | Camera index `0` | Camera `0`; configurable source |
+| Pose capacity | One | One | Multiple |
+| Flag rule | Wide bounds **OR** tilted torso | **2 of 3** cues | Wide bounds **AND** tilted torso |
+| Third cue | None | Relative-z spread `< 0.1` | None; 2D only |
+| View | One centered skeleton | One centered skeleton | Shared scale across detected poses |
+| Output | Printed label; optional file/window | Window + speech on flag entry | Window + speech when any flag first appears |
+
+All torso-angle thresholds are **greater than 30°** from vertical. These variants do not produce interchangeable classifications. [Exact rules and visibility handling](docs/TECHNICAL_OVERVIEW.md#posture-rules).
+
+## System overview
+
+<img src="docs/assets/architecture.svg" alt="Conceptual data flow: raw image or camera frame, MediaPipe or YOLO pose estimation, variant-specific posture rules, then a skeleton canvas and label with conditional live speech." width="720">
+
+Skeleton-only rendering reduces what the viewer displays. Raw RGB frames still enter the estimators in memory. Dropping Python references is not verified erasure of library buffers or a privacy-compliance guarantee.
+
+## Quick start
+
+Run commands from the repository root. The recorded inference runs used **Linux and Python 3.10.12** with an existing environment; a clean install and Windows execution have **not** been verified.
 
 ```bash
-python detection_with_images.py --image "Person not OK/3.jpg" --output demo_frames/skeleton.png
+git clone https://github.com/dvkkishore/scene-detect.git
+cd scene-detect
+python3.10 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements_demo.txt
 ```
 
-Use `--show` to open an OpenCV preview window, or `--help` for options. The default is headless and prints the label; saving an output image requires `--output`. The legacy image rule flags posture when the torso is tilted **or** the visible bounds are wider than tall. This is intentionally distinct from the YOLO live classifier, which currently requires both cues.
+On Windows, create the environment with `py -3.10 -m venv .venv` and activate it with `.venv\Scripts\Activate.ps1` in PowerShell.
 
-📁 Useful for: inspecting individual sample images and debugging posture heuristics, **not** measuring clinical safety.
+[requirements_demo.txt](requirements_demo.txt) lists the direct demo dependencies at the versions used for the recorded runs. Ultralytics also installs PyTorch; the recorded environment had PyTorch **2.7.0+cu126** and inference ran on CPU. The original Linux/Windows requirement files remain as historical exports: the Linux file includes ROS packages, and the Windows file omits MediaPipe and Ultralytics. They are not portable setup recipes.
 
----
+### Process an image
 
-### `detection_with_live_mediapipe.py`
-**Live Scene Detection (Single Person Only)**  
-Uses a webcam or phone camera feed and processes each frame using MediaPipe Pose.
+A small, credited NASA example is included so the first run does not depend on the older photos with unresolved provenance:
 
-- Only detects **one person** at a time
-- MediaPipe estimates 33 landmarks including relative z values (not a calibrated physical depth measurement)
-- Draws stick-figure in real time on a clean canvas
-- Announces via voice: **"Person not okay!"**
-- Drops local frame references after inference; this is not a formal privacy guarantee
-
-📁 Intended for: experiments with single-person live pose inference
-
----
-
-### `detection_with_live_yolo.py`
-**Live Scene Detection (Multi-Person)**  
-Uses YOLOv8-Pose for real-time detection of **multiple people**.
-
-- Draws each detected person's stick figure using its estimated 2D image keypoints
-- Classifies each person individually: **OK** / **NOT OK**
-- Places labels near each person
-- Voice notification if **anyone** receives the rule-based "Person NOT OK" label
-- Attempts to drop raw frame references after inference; library-level retention is not verified
-
-📁 Intended for: multi-person pose-estimation experiments and visualization
-
----
-
-## Voice Output
-All live scripts support audio alerts via `pyttsx3`. The system says:  
-**“Alert. Person not okay.”**  
-...when the posture heuristic triggers. The wording is a literal spoken message from the demo, not confirmation of a medical event.
-
----
-
-## Requirements
-
-Install dependencies:
-
-**For Linux**
 ```bash
-pip install -r requirements_linux.txt
+python detection_with_images.py \
+  --image docs/assets/inputs/nasa-astronaut.jpg \
+  --output demo_frames/skeleton.png
 ```
 
-**For Windows**
-```bash
-pip install -r requirements_win.txt
-```
+Expected label in the recorded environment: `Person OK (Posture Flag Clear)`. Add `--show` for an OpenCV window. Without `--output`, the CLI prints the label without saving a file; it does not scan the sample folders.
 
-Basic requirements:
-- Python 3.8+
-- OpenCV
-- MediaPipe
-- Ultralytics (for YOLOv8)
-- pyttsx3
+The image path uses MediaPipe's legacy `mp.solutions.pose` API and the heavy pose model. The pinned version provides that API; MediaPipe may need to download model data on first use. The recorded environment already contained the model files.
 
----
+### Run a camera viewer
 
-## How to Run
-
-**Image detection (specify an image):**
-```bash
-python detection_with_images.py --image "Person not OK/3.jpg" --output demo_frames/skeleton.png
-```
-
-**Live detection (MediaPipe):**
 ```bash
 python detection_with_live_mediapipe.py
-```
-
-**Live detection (YOLOv8 multi-person):**
-```bash
+# Or, for multiple people:
 python detection_with_live_yolo.py
 ```
 
----
+Both require a working camera, desktop OpenCV display, and an OS speech backend for `pyttsx3` (such as eSpeak on Linux). Speech initializes at startup; these scripts have no mute flag. Press **q** in the preview window to exit.
 
-## Evaluation status
+YOLO loads the included `yolov8n-pose.pt` from the working directory. To use another camera or a local video in a POSIX shell:
 
-There is **no verified sensitivity, specificity, false-alert rate or benchmark accuracy** for the real-world use case. The code includes synthetic unit tests for the pure YOLO 2D heuristic. See [EXPERIMENTS.md](EXPERIMENTS.md) for a proposed evaluation protocol and checklist before reporting any results.
+```bash
+SCENE_DETECT_CAMERA=1 python detection_with_live_yolo.py
+SCENE_DETECT_CAMERA=/path/to/clip.mp4 python detection_with_live_yolo.py
+```
 
-Note: the `requirements_linux.txt` and `requirements_win.txt` files are historical environment exports rather than a verified portable installation recipe. In particular, the Linux freeze also contains ROS-related packages unrelated to the isolated classifier tests.
+In PowerShell, set `$env:SCENE_DETECT_CAMERA = '1'` before running the script. MediaPipe's viewer uses camera `0` directly in its source. For a headless replay of either live variant, use the [capture commands](docs/DEMONSTRATIONS.md#reproduce-the-live-script-captures).
 
-## Safety and Privacy Limitations
+## Example outputs
 
-This is a **research/demo posture heuristic**, not medical-grade fall detection. A person lying voluntarily may be flagged, and a genuine fall may be missed. Do not rely on these labels for emergencies or unsupervised elderly-care monitoring. The YOLOv8-pose stream returns 2D coordinates and confidence; the implementation must not treat image Y position as a genuine depth measurement.
+These are saved canvases from actual model inference, with no redrawn keypoints or substituted labels. The rotation is an **image-orientation stress check**, not footage of a lying person or a fall.
 
-The live interfaces show skeleton-only renderings, but original RGB frames are processed by MediaPipe/Ultralytics in memory. Deleting Python references does not prove that all internal copies are immediately erased. The repository also contains test photos. No regulatory/privacy compliance has been established by this prototype.
+| Image CLI: portrait | Image CLI: rotated 90° | YOLO: partial-body portrait |
+| --- | --- | --- |
+| ![MediaPipe image output: partial skeleton, Person OK posture flag clear](docs/assets/outputs/image-nasa-astronaut.png) | ![MediaPipe image output for the clockwise-rotated portrait: horizontal skeleton and Person NOT OK posture flag](docs/assets/outputs/image-nasa-astronaut-rotated.png) | ![YOLO live-script output for the portrait: partial skeleton labeled Insufficient Pose](docs/assets/outputs/yolo-portrait.png) |
+| Flag clear | Flag triggered by orientation | Shoulders/hips lack sufficient confidence |
 
-**Camera selection (YOLO):** the default source is camera index 0. Set `SCENE_DETECT_CAMERA` to another camera index or stream URL in the environment if required. Do not commit a credential-bearing camera URL.
+The image CLI also returned `No Person Detected` on a generated white image. The live MediaPipe script returned `Person OK` on the portrait and `Person NOT OK` on its rotation, requesting “Person not okay!” in the latter run; speech was muted by the capture tool. [All seven execution records and full-size outputs](docs/DEMONSTRATIONS.md#recorded-results).
 
-**Classifier regression tests:**
+## Evaluation and limitations
+
+The [existing regression tests](tests/) check classifier logic and CLI behavior; additional capture tests check replay and export I/O. Run them with:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-The lightweight classifier tests require NumPy and do not require a camera or pre-trained model. Real-world sensitivity and false-alert rates remain unevaluated.
+The documentation captures establish that the recorded inputs passed through the estimators, rules, and renderers. They do not measure accuracy, speed, or emergency-detection performance. No camera device was available for this verification; live camera behavior, sustained tracking, and audible notifications remain unverified.
 
----
+Viewpoint, occlusion, incomplete bodies, and harmless reclining can change the output. MediaPipe's relative z is uncalibrated, and its normalized-coordinate geometry differs from YOLO's pixel geometry. Neither variant identifies a fall over time or assesses a person's health. The crew example also shows a missed person. See the [proposed evaluation protocol](EXPERIMENTS.md) before reporting performance.
 
-## Use Cases
+## Repository guide
 
-- 🧪 Demonstrating posture classification on single images or live camera streams
-- 👩‍🏫 Teaching pose estimation and skeleton-based visualization
-- 📊 Exploring classifier evaluation, camera viewpoints, and false-alert behavior
+| Path | Contents |
+| --- | --- |
+| `detection_with_*.py` | Three demonstration entry points |
+| [pose_classifier.py](pose_classifier.py) | Pure 2D posture rule used by YOLO |
+| [docs/TECHNICAL_OVERVIEW.md](docs/TECHNICAL_OVERVIEW.md) | Geometry, input/output behavior, and implementation trade-offs |
+| [docs/DEMONSTRATIONS.md](docs/DEMONSTRATIONS.md) | Reproduction commands, verification evidence, and asset provenance |
+| [EXPERIMENTS.md](EXPERIMENTS.md) | Proposed evaluation protocol; no empirical scores |
+| `docs/assets/` | Small documented inputs, captured canvases, diagrams, and run records |
+| `tools/` | Documentation capture and layout generation; no detector changes |
+| `tests/` | Classifier, CLI, and capture I/O checks |
+| `Person OK/`, `Person not OK/`, `Nobody/` | Original sample photographs; redistribution provenance unresolved |
 
-**Not a validated use case:** unattended safety monitoring of older or visually impaired people, fall detection, or triggering an emergency response. Such applications require separate real-world validation and safety controls.
+Original photographs and model weights are preserved. The repository has no top-level license file; this documentation change does not grant a new license for the existing code, weights, or samples. Added image sources and usage terms are recorded in the [provenance notes](docs/DEMONSTRATIONS.md#asset-provenance).
 
----
+## Contributors and attribution
 
-## Authors
+**Farrukh Rasool, Ammad Majid, Sai Pavan Bolagani, Syed Annas Jawed, Soham Shripad Kharadkar, and Venkata Kishore Dannana.**
 
-- **Farrukh Rasool, Ammad Majid, Sai Pavan Bolagani, Syed Annas Jawed, Soham Shripad Kharadkar, Venkata Kishore Dannana**
-- Smart Scene Detect Project, OTH Amberg-Weiden
-- Course: Industry 4.0 Project/ Artificial Intelligence for Industrial Applications
+Smart Scene Detect Project, **OTH Amberg-Weiden**. Course: **Industry 4.0 Project / Artificial Intelligence for Industrial Applications**.
 
----
+This is a collaborative project. Individual subsystem responsibilities are not assigned here; the original author list and contributor history are preserved.

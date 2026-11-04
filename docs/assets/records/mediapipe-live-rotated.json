@@ -1,0 +1,16 @@
+{
+  "script": "detection_with_live_mediapipe.py",
+  "script_sha256": "4d24764c8bdcbca4c21750634aa0a98bbe03da1b8242cd0f9ece5b5982fc373a",
+  "input": "docs/assets/inputs/nasa-astronaut-rotated.jpg",
+  "input_sha256": "1fae31aa5da980ad3dc24980d1b08da05f62de08a9866f850ebe8c2f312e6228",
+  "output": "docs/assets/outputs/mediapipe-live-rotated.png",
+  "output_sha256": "51ea62d03f6f1d3c5f8ca665ab9d6ad7d631d422c1834badfedd553ad70a2407",
+  "drawn_labels": [
+    "Person NOT OK"
+  ],
+  "speech_requests_muted": [
+    "Person not okay!"
+  ],
+  "capture_mode": "local file replay; last displayed canvas; GUI and speech intercepted",
+  "command": "python tools/capture_live_demo.py --variant mediapipe --input docs/assets/inputs/nasa-astronaut-rotated.jpg --output docs/assets/outputs/mediapipe-live-rotated.png --record docs/assets/records/mediapipe-live-rotated.json"
+}
